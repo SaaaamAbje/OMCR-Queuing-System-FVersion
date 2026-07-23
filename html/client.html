@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+ <title>OMCR – Get a Queue Number</title>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="phone-shell">
+
+ <!-- ══ SPLASH SCREEN ══ -->
+ <div class="splash" id="splash" onclick="enterApp()">
+  <!-- Background rings -->
+  <div class="splash-ring splash-ring-1"></div>
+  <div class="splash-ring splash-ring-2"></div>
+  <div class="splash-ring splash-ring-3"></div>
+
+  <!-- Top badges -->
+  <div class="splash-top">
+   <div class="splash-lang-toggle">
+    <button class="splash-lang-btn active" id="splash-lang-en" onclick="event.stopPropagation();setSplashLang('en')">EN</button>
+    <button class="splash-lang-btn" id="splash-lang-fil" onclick="event.stopPropagation();setSplashLang('fil')">FIL</button>
+   </div>
+  </div>
+
+  <!-- Seals row -->
+  <div class="splash-seals">
+   <!-- OMCR / Rosario Seal -->
+   <div class="splash-seal-wrap">
+    <img class="splash-seal-img" src="images/rosario-seal.jpg" alt="Rosario LGU Seal" style="width:100%;height:100%;object-fit:contain;">
+   </div>
+
+   <!-- Divider -->
+   <div class="splash-seal-divider"></div>
+
+   <!-- Bagong Pilipinas -->
+   <div class="splash-seal-wrap">
+    <img class="splash-seal-img" src="images/bagong-pilipinas.webp" alt="Bagong Pilipinas" style="width:100%;height:100%;object-fit:contain;padding:4px;">
+   </div>
+  </div>
+
+  <!-- Center content -->
+  <div class="splash-center">
+   <div class="splash-welcome" id="splash-welcome">WELCOME TO THE</div>
+   <div class="splash-office" id="splash-office">Office of the Municipal<br>Civil Registrar</div>
+   <div class="splash-acronym">OMCR</div>
+   <div class="splash-tagline" id="splash-tagline">Rosario, Batangas</div>
+  </div>
+
+  <!-- Bottom -->
+  <div class="splash-bottom">
+   <div class="splash-dot-row">
+    <div class="splash-dot"></div>
+    <div class="splash-dot active"></div>
+    <div class="splash-dot"></div>
+   </div>
+   <button class="splash-enter-btn" id="splash-enter-btn" onclick="enterApp()">
+    <span id="splash-btn-text">Tap to Enter</span>
+   </button>
+   <div class="splash-hint" id="splash-hint">Touch anywhere to continue</div>
+  </div>
+ </div>
+
+ <!-- Status Bar -->
+ <div id="app-content" class="app-hidden" style="display:none;flex-direction:column;flex:1;">
+ <div class="status-bar">
+  <div class="status-time" id="status-time">9:41</div>
+  <div class="lang-toggle">
+   <button class="lang-btn active" id="lang-en" onclick="setLang('en')">EN</button>
+   <button class="lang-btn" id="lang-fil" onclick="setLang('fil')">FIL</button>
+  </div>
+ </div>
+
+ <!-- App Header -->
+ <div class="app-header">
+  <div class="header-top">
+   <div class="header-brand">
+    <div class="app-seal">
+     <img src="images/rosario-seal.jpg" alt="Rosario Seal" style="width:100%;height:100%;object-fit:cover;">
+    </div>
+    <div>
+     <div class="brand-name">OMCR</div>
+     <div class="brand-sub" data-en="Civil Registrar" data-fil="Tagapagpanatili ng Sibil">Civil Registrar</div>
+    </div>
+   </div>
+   <div style="text-align:right;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:rgba(255,255,255,.72);background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:.28rem .62rem;" id="clock">--:--</div>
+   </div>
+  </div>
+  <div class="header-title" data-en="Get a Queue Number" data-fil="Kumuha ng Numero sa Pila">Get a Queue Number</div>
+  <div class="header-sub" data-en="Fill in 3 quick steps — takes under a minute" data-fil="Sagutan ang 3 hakbang — wala pang isang minuto">Fill in 3 quick steps — takes under a minute</div>
+ </div>
+
+ <!-- ── STEP PROGRESS BAR ── -->
+ <div class="step-progress" id="step-progress">
+  <div class="step-labels">
+   <span class="step-label active" id="lbl-1" data-en="Service" data-fil="Serbisyo">Service</span>
+   <span class="step-label" id="lbl-2" data-en="Details" data-fil="Detalye">Details</span>
+   <span class="step-label" id="lbl-3" data-en="Confirm" data-fil="Kumpirma">Confirm</span>
+  </div>
+  <div class="step-track">
+   <div class="step-seg"><div class="step-fill" id="fill-1"></div></div>
+   <div class="step-seg"><div class="step-fill" id="fill-2"></div></div>
+   <div class="step-seg"><div class="step-fill" id="fill-3"></div></div>
+   <div class="step-counter">Step <span id="step-num">1</span> of 3</div>
+  </div>
+ </div>
+
+ <!-- SCROLL BODY -->
+ <div class="scroll-body" id="scroll-body">
+
+  <!-- ══ STEP 1: SERVICE SELECTION ══ -->
+  <div class="step-panel active" id="step-1">
+   <div class="form-card">
+    <div class="form-card-header">
+     <i data-lucide="layout-grid" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
+     <div class="form-card-title" data-en="Choose Your Service" data-fil="Pumili ng Serbisyo">Choose Your Service</div>
+    </div>
+    <div class="form-card-body">
+     <div class="service-grid">
+      <input type="radio" name="service" id="svc-B" value="B" class="svc-radio">
+      <label for="svc-B" class="svc-label">
+       <div class="svc-icon"><i data-lucide="file-plus" class="lucide"></i></div>
+       <div class="svc-name" data-en="Birth Certificate" data-fil="Sertipiko ng Kapanganakan">Birth Certificate</div>
+       <div class="svc-series">B-Series · Window 1</div>
+      </label>
+
+      <input type="radio" name="service" id="svc-M" value="M" class="svc-radio">
+      <label for="svc-M" class="svc-label">
+       <div class="svc-icon"><i data-lucide="heart" class="lucide"></i></div>
+       <div class="svc-name" data-en="Marriage Certificate" data-fil="Sertipiko ng Kasal">Marriage Certificate</div>
+       <div class="svc-series">M-Series · Window 2</div>
+      </label>
+
+      <input type="radio" name="service" id="svc-D" value="D" class="svc-radio">
+      <label for="svc-D" class="svc-label">
+       <div class="svc-icon"><i data-lucide="file-x" class="lucide"></i></div>
+       <div class="svc-name" data-en="Death Certificate" data-fil="Sertipiko ng Kamatayan">Death Certificate</div>
+       <div class="svc-series">D-Series · Window 3</div>
+      </label>
+
+      <input type="radio" name="service" id="svc-C" value="C" class="svc-radio">
+      <label for="svc-C" class="svc-label">
+       <div class="svc-icon"><i data-lucide="pencil" class="lucide"></i></div>
+       <div class="svc-name" data-en="Correction of Entry" data-fil="Pagwawasto ng Talaan">Correction of Entry</div>
+       <div class="svc-series">C-Series · Window 4</div>
+      </label>
+     </div>
+     <div id="svc-error" style="display:none;font-size:.68rem;color:var(--red);font-weight:700;margin-top:.62rem;" data-en="⚠ Please select a service to continue." data-fil="⚠ Pumili ng serbisyo upang magpatuloy.">⚠ Please select a service to continue.</div>
+    </div>
+   </div>
+
+   <div class="form-card">
+    <div class="form-card-header">
+     <i data-lucide="tag" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
+     <div class="form-card-title" data-en="Purpose of Request" data-fil="Layunin ng Kahilingan">Purpose of Request</div>
+    </div>
+    <div class="form-card-body">
+     <div class="purpose-grid">
+      <input type="radio" name="purpose" id="pur-1" value="Personal use / records" class="purpose-radio">
+      <label for="pur-1" class="purpose-tag" data-en="Personal use" data-fil="Personal na gamit">Personal use</label>
+
+      <input type="radio" name="purpose" id="pur-2" value="Employment / job application" class="purpose-radio">
+      <label for="pur-2" class="purpose-tag" data-en="Employment" data-fil="Trabaho">Employment</label>
+
+      <input type="radio" name="purpose" id="pur-3" value="Passport / travel documents" class="purpose-radio">
+      <label for="pur-3" class="purpose-tag" data-en="Passport / Travel" data-fil="Pasaporte / Biyahe">Passport / Travel</label>
+
+      <input type="radio" name="purpose" id="pur-4" value="School / education" class="purpose-radio">
+      <label for="pur-4" class="purpose-tag" data-en="School" data-fil="Paaralan">School</label>
+
+      <input type="radio" name="purpose" id="pur-5" value="Government requirements" class="purpose-radio">
+      <label for="pur-5" class="purpose-tag" data-en="Government" data-fil="Gobyerno">Government</label>
+
+      <input type="radio" name="purpose" id="pur-6" value="Others" class="purpose-radio">
+      <label for="pur-6" class="purpose-tag" data-en="Others" data-fil="Iba pa">Others</label>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- ══ STEP 2: PERSONAL DETAILS ══ -->
+  <div class="step-panel" id="step-2">
+   <div class="form-card">
+    <div class="form-card-header">
+     <i data-lucide="user" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
+     <div class="form-card-title" data-en="Your Information" data-fil="Iyong Impormasyon">Your Information</div>
+    </div>
+    <div class="form-card-body">
+     <div class="field-group">
+      <div class="field">
+       <label for="fname" data-en="First Name" data-fil="Pangalan"><span data-en="First Name" data-fil="Pangalan">First Name</span> <span class="req">*</span></label>
+       <input type="text" id="fname" placeholder="e.g. Maria" data-en-placeholder="e.g. Maria" data-fil-placeholder="hal. Maria" autocomplete="given-name" inputmode="text">
+       <span class="field-error" data-en="First name is required." data-fil="Kailangan ang pangalan.">First name is required.</span>
+      </div>
+      <div class="field">
+       <label for="lname"><span data-en="Last Name" data-fil="Apelyido">Last Name</span> <span class="req">*</span></label>
+       <input type="text" id="lname" placeholder="e.g. Santos" data-en-placeholder="e.g. Santos" data-fil-placeholder="hal. Santos" autocomplete="family-name" inputmode="text">
+       <span class="field-error" data-en="Last name is required." data-fil="Kailangan ang apelyido.">Last name is required.</span>
+      </div>
+      <div class="field">
+       <label for="contact"><span data-en="Contact Number" data-fil="Numero ng Telepono">Contact Number</span> <span class="req">*</span></label>
+       <input type="tel" id="contact" placeholder="09XX-XXX-XXXX" autocomplete="tel" inputmode="tel">
+       <span class="field-hint" data-en="So we can notify you when it's your turn." data-fil="Para maabisuhan kayo kapag ikaw na ang susunod.">So we can notify you when it's your turn.</span>
+       <span class="field-error" data-en="Enter a valid PH mobile number." data-fil="Maglagay ng tamang numero ng telepono.">Enter a valid PH mobile number.</span>
+      </div>
+      <div class="field">
+       <label for="copies"><span data-en="Number of Copies Needed" data-fil="Bilang ng Kopyang Kailangan">Number of Copies Needed</span></label>
+       <select id="copies">
+        <option value="1" data-en="1 copy" data-fil="1 kopya">1 copy</option>
+        <option value="2" data-en="2 copies" data-fil="2 kopya">2 copies</option>
+        <option value="3" data-en="3 copies" data-fil="3 kopya">3 copies</option>
+        <option value="4" data-en="4 copies" data-fil="4 kopya">4 copies</option>
+        <option value="5" data-en="5 copies" data-fil="5 kopya">5 copies</option>
+       </select>
+      </div>
+      <div class="field">
+       <label for="notes"><span data-en="Additional Notes" data-fil="Karagdagang Tala">Additional Notes</span></label>
+       <textarea id="notes" placeholder="Any special instructions or details (optional)..." data-en-placeholder="Any special instructions or details (optional)..." data-fil-placeholder="Anumang espesyal na tagubilin (opsyonal)..." rows="3"></textarea>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- ══ STEP 3: CONFIRM ══ -->
+  <div class="step-panel" id="step-3">
+   <div class="confirm-card">
+    <div class="confirm-header">
+     <div class="confirm-header-label" data-en="Your Request Summary" data-fil="Buod ng Iyong Kahilingan">Your Request Summary</div>
+     <div class="confirm-header-svc" id="confirm-svc-name">—</div>
+    </div>
+    <div class="confirm-body" id="confirm-body">
+     <div class="confirm-row">
+      <div class="confirm-icon"><i data-lucide="user" class="lucide"></i></div>
+      <div><div class="confirm-key" data-en="Full Name" data-fil="Buong Pangalan">Full Name</div><div class="confirm-val" id="c-name">—</div></div>
+     </div>
+     <div class="confirm-row">
+      <div class="confirm-icon"><i data-lucide="phone" class="lucide"></i></div>
+      <div><div class="confirm-key" data-en="Contact" data-fil="Telepono">Contact</div><div class="confirm-val" id="c-contact">—</div></div>
+     </div>
+     <div class="confirm-row">
+      <div class="confirm-icon"><i data-lucide="tag" class="lucide"></i></div>
+      <div><div class="confirm-key" data-en="Purpose" data-fil="Layunin">Purpose</div><div class="confirm-val" id="c-purpose">—</div></div>
+     </div>
+     <div class="confirm-row">
+      <div class="confirm-icon"><i data-lucide="copy" class="lucide"></i></div>
+      <div><div class="confirm-key" data-en="Copies" data-fil="Kopya">Copies</div><div class="confirm-val" id="c-copies">1 copy</div></div>
+     </div>
+    </div>
+   </div>
+
+   <div class="notice">
+    <i data-lucide="info" class="lucide" style="color:#92400e;"></i>
+    <span data-en="Please bring a <strong>valid government-issued ID</strong> when your number is called. Fees are collected at the Treasury window after processing." data-fil="Mangyaring magdala ng <strong>wastong ID mula sa gobyerno</strong> kapag tinawag ang inyong numero. Ang bayad ay sisiingilin sa Treasury pagkatapos ng proseso.">Please bring a <strong>valid government-issued ID</strong> when your number is called. Fees are collected at the Treasury window after processing.</span>
+   </div>
+  </div>
+
+  <!-- ══ SUCCESS SCREEN ══ -->
+  <div class="success-screen" id="success-screen">
+   <div class="success-ring">
+    <svg viewBox="0 0 100 100">
+     <circle class="success-ring-circle" cx="50" cy="50" r="45"/>
+     <circle class="success-ring-progress" id="success-ring-prog" cx="50" cy="50" r="45" transform="rotate(-90 50 50)"/>
+    </svg>
+    <div class="success-icon-inner">
+     <svg id="success-check" class="success-checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;color:var(--green);opacity:0;transform:scale(.5);transition:all .38s cubic-bezier(.34,1.56,.64,1) .65s;"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+   </div>
+
+   <div>
+    <div class="success-title" data-en="You're in the queue!" data-fil="Ikaw ay nasa pila na!">You're in the queue!</div>
+    <div class="success-sub" style="margin-top:.42rem;" data-en="Your number has been issued. Listen for your call." data-fil="Naibigay na ang inyong numero. Pakinggan ang inyong tawag.">Your number has been issued. Listen for your call.</div>
+   </div>
+
+   <div class="ticket-card" id="ticket-card">
+    <div class="ticket-top">
+     <div class="ticket-label" data-en="Queue Number" data-fil="Numero sa Pila">Queue Number</div>
+     <div class="ticket-number" id="ticket-number">B001</div>
+     <div class="ticket-svc" id="ticket-svc">Birth Certificate · Window 1</div>
+    </div>
+    <div class="ticket-bottom">
+     <div class="ticket-bottom-info">
+      <div class="ticket-meta"><strong id="ticket-name">—</strong></div>
+      <div class="ticket-meta"><span data-en="Issued at" data-fil="Inilabas nang">Issued at</span> <strong id="ticket-time">—</strong></div>
+      <div class="ticket-meta" id="ticket-position" style="margin-top:.2rem;color:var(--navy);"></div>
+     </div>
+     <div class="ticket-qr"><i data-lucide="qr-code" class="lucide"></i></div>
+    </div>
+   </div>
+
+   <div class="success-actions">
+    <button class="btn btn-ghost" onclick="getAnotherNumber()">
+     <i data-lucide="plus-circle" class="lucide" style="width:15px;height:15px;"></i>
+     <span data-en="Get Another Number" data-fil="Kumuha ng Bagong Numero">Get Another Number</span>
+    </button>
+   </div>
+  </div>
+
+ </div><!-- end scroll-body -->
+
+ <!-- ── STICKY FOOTER (hidden on success) ── -->
+ <div class="form-footer" id="form-footer">
+  <div class="btn-row" id="btn-row">
+   <button class="btn btn-ghost" id="btn-back" onclick="goBack()" style="display:none;">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    <span id="btn-back-text" data-en="Back" data-fil="Bumalik">Back</span>
+   </button>
+   <button class="btn btn-primary" id="btn-next" onclick="goNext()">
+    <span class="btn-text" id="btn-next-text" data-en="Next Step" data-fil="Susunod">Next Step</span>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+   </button>
+  </div>
+ </div>
+
+ <!-- Bottom nav -->
+ <nav class="bottom-nav" id="bottom-nav" style="display:none;">
+  <a href="omcr-display.html" class="nav-btn"><div class="nav-icon"><i data-lucide="layout-list" class="lucide"></i></div><div class="nav-label">Queue Board</div></a>
+  <a href="omcr-client.html" class="nav-btn active"><div class="nav-icon"><i data-lucide="ticket" class="lucide"></i></div><div class="nav-label">Get Number</div></a>
+ </nav>
+ </div><!-- end app-content -->
+
+</div><!-- end phone-shell -->
+
+<!-- Confetti container -->
+<div class="confetti-wrap" id="confetti-wrap"></div>
+
+<!-- Toast area -->
+<div class="toast-area" id="toast-area"></div>
+
+<script src="js/app.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" onload="refreshIcons()"></script>
+</body>
+</html>

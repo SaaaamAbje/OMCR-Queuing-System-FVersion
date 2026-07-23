@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMCR Queue Display — Rosario, Batangas</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tv-display.css">
+</head>
+<body>
+<div class="screen">
+
+ <div class="header">
+  <div class="header-brand">
+   <div class="header-seal"><img src="images/rosario-seal.jpg" alt="Rosario Seal"></div>
+   <div class="header-title">
+    <h1>Office of the Municipal Civil Registrar</h1>
+    <p>Rosario, Batangas · Queue Monitoring Board</p>
+   </div>
+  </div>
+  <div class="header-center"><div class="header-tagline">Now Serving</div></div>
+  <div class="header-right">
+   <div class="clock" id="clock">--:--:--</div>
+   <div class="clock-date" id="clock-date">---</div>
+   <div class="live-pill" id="live-pill"><div class="live-dot" id="live-dot"></div><span id="live-text">Live</span></div>
+  </div>
+ </div>
+
+ <div class="body" id="main-body">
+  <div class="window-col" id="col-B">
+   <div class="window-col-header"><div class="window-svc">Birth Certificate</div><div class="window-badge">Window 1</div></div>
+   <div class="ns-label">Now Serving</div>
+   <div class="ns-number" id="ns-B">—</div>
+   <div class="ns-divider"></div>
+   <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="st-issued-B">0</div><div class="stat-lbl">Issued</div></div>
+    <div class="stat"><div class="stat-val" id="st-waiting-B">0</div><div class="stat-lbl">Waiting</div></div>
+    <div class="stat"><div class="stat-val" id="st-served-B">0</div><div class="stat-lbl">Served</div></div>
+   </div>
+   <div class="queue-section-label">Up Next</div>
+   <div class="queue-list" id="ql-B"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="window-col" id="col-M">
+   <div class="window-col-header"><div class="window-svc">Marriage Certificate</div><div class="window-badge">Window 2</div></div>
+   <div class="ns-label">Now Serving</div>
+   <div class="ns-number" id="ns-M">—</div>
+   <div class="ns-divider"></div>
+   <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="st-issued-M">0</div><div class="stat-lbl">Issued</div></div>
+    <div class="stat"><div class="stat-val" id="st-waiting-M">0</div><div class="stat-lbl">Waiting</div></div>
+    <div class="stat"><div class="stat-val" id="st-served-M">0</div><div class="stat-lbl">Served</div></div>
+   </div>
+   <div class="queue-section-label">Up Next</div>
+   <div class="queue-list" id="ql-M"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="window-col" id="col-D">
+   <div class="window-col-header"><div class="window-svc">Death Certificate</div><div class="window-badge">Window 3</div></div>
+   <div class="ns-label">Now Serving</div>
+   <div class="ns-number" id="ns-D">—</div>
+   <div class="ns-divider"></div>
+   <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="st-issued-D">0</div><div class="stat-lbl">Issued</div></div>
+    <div class="stat"><div class="stat-val" id="st-waiting-D">0</div><div class="stat-lbl">Waiting</div></div>
+    <div class="stat"><div class="stat-val" id="st-served-D">0</div><div class="stat-lbl">Served</div></div>
+   </div>
+   <div class="queue-section-label">Up Next</div>
+   <div class="queue-list" id="ql-D"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="window-col" id="col-C">
+   <div class="window-col-header"><div class="window-svc">Correction of Entry</div><div class="window-badge">Window 4</div></div>
+   <div class="ns-label">Now Serving</div>
+   <div class="ns-number" id="ns-C">—</div>
+   <div class="ns-divider"></div>
+   <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="st-issued-C">0</div><div class="stat-lbl">Issued</div></div>
+    <div class="stat"><div class="stat-val" id="st-waiting-C">0</div><div class="stat-lbl">Waiting</div></div>
+    <div class="stat"><div class="stat-val" id="st-served-C">0</div><div class="stat-lbl">Served</div></div>
+   </div>
+   <div class="queue-section-label">Up Next</div>
+   <div class="queue-list" id="ql-C"></div>
+  </div>
+ </div>
+
+ <div class="footer">
+  <div class="footer-left">Republic of the Philippines · Local Government Unit — Rosario, Batangas · OMCR Queue System</div>
+  <div class="footer-ticker" id="footer-ticker">Connecting...</div>
+ </div>
+
+</div>
+
+<div class="sound-toggle" id="sound-toggle" onclick="toggleSound()">
+ <span id="sound-icon">🔊</span>
+ <span class="sound-toggle-label" id="sound-label">Sound On</span>
+</div>
+
+<div class="connecting-overlay" id="connecting-overlay">
+ <div class="spinner"></div>
+ <div class="connecting-text">Connecting to Firebase...</div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/tv-display.js"></script>
+</body>
+</html>
