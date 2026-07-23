@@ -6,5 +6,3 @@
    Kept in its own file so it's easy to swap between dev/staging/prod projects. */
 
    
-const FIREBASE_URL = 'https://omcr-queue-default-rtdb.asia-southeast1.firebasedatabase.app';
-const FB_API_KEY = 'AIzaSyBuraVhdqJizUAVELWfxVBA_1kvPZfg2xo';
