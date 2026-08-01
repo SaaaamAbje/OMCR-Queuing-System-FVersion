@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OMCR — Birth Certificate · Window 1</title>
+<title>OMCR — Death Certificate · Window 3</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<link rel="stylesheet" href="css/birth-window1.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/death-window3.css">
 </head>
 <body>
 
@@ -25,12 +26,12 @@
 
 <div class="transfer-modal" id="transfer-modal">
  <div class="transfer-box">
-  <div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:.3rem;">↗ Transfer Client</div>
+  <div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:.3rem;">Transfer Client</div>
   <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:1rem;">Select the window to transfer to:</div>
   <div id="transfer-options"></div>
   <div style="display:flex;gap:.6rem;margin-top:.5rem;">
    <button class="btn btn-cancel" style="flex:1;" onclick="closeTransferModal()">Cancel</button>
-   <button style="flex:1;padding:.65rem;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:700;font-size:.82rem;cursor:pointer;" onclick="confirmTransfer()">Transfer</button>
+   <button style="flex:1;padding:.65rem;background:#16a34a;color:white;border:none;border-radius:8px;font-weight:700;font-size:.82rem;cursor:pointer;" onclick="confirmTransfer()">Transfer</button>
   </div>
  </div>
 </div>
@@ -41,7 +42,7 @@
   <div class="login-seal"><img src="images/rosario-seal.jpg" alt="Rosario Seal"></div>
   <div class="login-org">Office of the Municipal Civil Registrar · Rosario, Batangas</div>
   <div class="login-title">Staff Portal</div>
-  <div class="login-window-tag">Window 1 — Birth Certificate</div>
+  <div class="login-window-tag">Window 3 — Death Certificate</div>
   <div class="login-field">
    <label>Email</label>
    <input type="email" id="login-email" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()">
@@ -66,9 +67,10 @@
   </div>
  </div>
  <div class="topbar-right">
-  <button onclick="backupToFirebase()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;font-size:.65rem;font-weight:700;border-radius:7px;padding:.28rem .65rem;cursor:pointer;">💾 Backup</button>
-  <span class="staff-pill" id="staff-pill">👤 Fe Dimaculangan</span>
-  <span class="window-pill">Window 1 — Birth Certificate</span>
+  <button onclick="backupToFirebase()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;font-size:.65rem;font-weight:700;border-radius:7px;padding:.28rem .65rem;cursor:pointer;">Backup</button>
+  <span class="staff-pill" id="staff-pill">Leah Espeleta</span>
+  <button onclick="doLogout()" title="Log Out" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;font-size:.65rem;font-weight:700;border-radius:7px;padding:.28rem .65rem;cursor:pointer;">Log Out</button>
+  <span class="window-pill">Window 3 — Death Certificate</span>
   <span class="topbar-clock" id="topbar-clock">--:--:--</span>
  </div>
 </div>
@@ -79,8 +81,8 @@
   <div class="wc-header">
    <div class="wc-header-top">
     <div>
-     <div class="wc-svc-name">Birth Certificate</div>
-     <div class="wc-series">B-Series · Window 1</div>
+     <div class="wc-svc-name">Death Certificate</div>
+     <div class="wc-series">D-Series · Window 3</div>
     </div>
     <div style="display:flex;align-items:center;gap:.5rem;">
      <div class="live-dot"></div>
@@ -123,23 +125,23 @@
     <div class="cp-empty">No client called yet.<br>Press "Call Next Number" to begin.</div>
    </div>
    <div class="notes-wrap" id="notes-wrap" style="display:none;padding:0 1rem 1rem;">
-    <div class="notes-label">📝 Staff Notes</div>
+    <div class="notes-label">Staff Notes</div>
     <textarea class="notes-textarea" id="notes-textarea" placeholder="Add a note for this client..."></textarea>
-    <div style="display:flex;align-items:center;"><button class="notes-save-btn" onclick="saveNote()">Save Note</button><span class="notes-saved" id="notes-saved">✓ Saved</span></div>
+    <div style="display:flex;align-items:center;"><button class="notes-save-btn" onclick="saveNote()">Save Note</button><span class="notes-saved" id="notes-saved">Saved</span></div>
    </div>
   </div>
 
   <div style="background:white;border:1.5px solid var(--border);border-radius:14px;padding:.75rem 1rem;">
-   <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem;">⭐ Priority Client</div>
+   <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem;">Priority Client</div>
    <div class="priority-btn-group">
-    <button class="priority-btn" id="pri-btn-senior" onclick="setPriority('senior')">👴 Senior</button>
-    <button class="priority-btn" id="pri-btn-pwd" onclick="setPriority('pwd')">♿ PWD</button>
-    <button class="priority-btn" id="pri-btn-pregnant" onclick="setPriority('pregnant')">🤰 Pregnant</button>
+    <button class="priority-btn" id="pri-btn-senior" onclick="setPriority('senior')">Senior</button>
+    <button class="priority-btn" id="pri-btn-pwd" onclick="setPriority('pwd')">PWD</button>
+    <button class="priority-btn" id="pri-btn-pregnant" onclick="setPriority('pregnant')">Pregnant</button>
    </div>
   </div>
 
   <div class="history-card">
-   <div class="log-header"><div class="log-header-title">🔍 History Lookup</div></div>
+   <div class="log-header"><div class="log-header-title">History Lookup</div></div>
    <div class="history-search-wrap">
     <input type="text" class="history-search-input" id="history-query" placeholder="Name or ticket number..." onkeydown="if(event.key==='Enter')searchHistory()">
     <button class="history-search-btn" onclick="searchHistory()">Search</button>
@@ -148,11 +150,11 @@
   </div>
 
   <div class="checklist-card">
-   <div class="log-header"><div class="log-header-title">📋 Required Documents</div></div>
-   <div class="checklist-body"><div class="checklist-item" id="cli-0"><input type="checkbox" id="chk-0" onchange="toggleCheck(0)"><label for="chk-0">PSA Birth Certificate (original + photocopy)</label></div>
+   <div class="log-header"><div class="log-header-title">Required Documents</div></div>
+   <div class="checklist-body"><div class="checklist-item" id="cli-0"><input type="checkbox" id="chk-0" onchange="toggleCheck(0)"><label for="chk-0">PSA Death Certificate (original + photocopy)</label></div>
     <div class="checklist-item" id="cli-1"><input type="checkbox" id="chk-1" onchange="toggleCheck(1)"><label for="chk-1">Valid government-issued ID of requestor</label></div>
-    <div class="checklist-item" id="cli-2"><input type="checkbox" id="chk-2" onchange="toggleCheck(2)"><label for="chk-2">Authorization letter (if not the owner)</label></div>
-    <div class="checklist-item" id="cli-3"><input type="checkbox" id="chk-3" onchange="toggleCheck(3)"><label for="chk-3">Marriage certificate (if name change involved)</label></div></div>
+    <div class="checklist-item" id="cli-2"><input type="checkbox" id="chk-2" onchange="toggleCheck(2)"><label for="chk-2">Authorization letter (if not immediate family)</label></div>
+    <div class="checklist-item" id="cli-3"><input type="checkbox" id="chk-3" onchange="toggleCheck(3)"><label for="chk-3">Relationship proof (if not next of kin)</label></div></div>
   </div>
 
   <div class="log-card">
@@ -166,7 +168,7 @@
   <div class="audit-card">
    <div class="log-header">
     <div class="log-header-title"><div class="live-dot"></div> Audit Log</div>
-    <button onclick="exportAuditLog()" style="font-size:.62rem;font-weight:700;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;">⬇ Export</button>
+    <button onclick="exportAuditLog()" style="font-size:.62rem;font-weight:700;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;">Export</button>
    </div>
    <div class="audit-body" id="audit-body"><div class="audit-empty">No actions recorded yet.</div></div>
   </div>
@@ -174,6 +176,7 @@
 </div>
 
 <script src="js/config.js"></script>
-<script src="js/birth-window1.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/death-window3.js"></script>
 </body>
 </html>

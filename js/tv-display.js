@@ -13,7 +13,6 @@ if (window.speechSynthesis) {
 }
 function toggleSound() {
     soundEnabled = !soundEnabled;
-    document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
     document.getElementById('sound-label').textContent = soundEnabled ? 'Sound On' : 'Sound Off';
 }
 function playChime() {
@@ -52,15 +51,11 @@ function announceNumber(numStr, svcName, windowName) {
         if (pref)
             utt.voice = pref;
         window.speechSynthesis.speak(utt);
-        setTimeout(() => { if (soundEnabled)
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }, 4000);
+        setTimeout(() => {
+            if (soundEnabled)
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+        }, 4000);
     }, 900);
-}
-async function fbGet(path) {
-    const r = await fetch(`${FIREBASE_URL}/${path}.json`, { method: 'GET', mode: 'cors' });
-    if (!r.ok)
-        throw new Error('HTTP ' + r.status);
-    return r.json();
 }
 async function refresh() {
     try {

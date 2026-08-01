@@ -1,0 +1,114 @@
+# OMCR Queue Management System
+
+A queue management system for the Office of the Municipal Civil Registrar (OMCR),
+Rosario, Batangas. Plain HTML/CSS/JS — no build step, no framework, no npm
+dependencies.
+
+## Pages
+
+| Page | Purpose |
+|---|---|
+| `index.html` | Public splash screen + "Get a Queue Number" flow |
+| `birth-window1.html` | Staff page — Birth Certificate, Window 1 |
+| `marriage-window2.html` | Staff page — Marriage Certificate, Window 2 |
+| `death-window3.html` | Staff page — Death Certificate, Window 3 |
+| `correction-window4.html` | Staff page — Correction of Entry, Window 4 |
+| `tv-display.html` | Public queue board, meant for a lobby TV/monitor |
+
+## Project structure
+
+```
+omcr-app/
+├── index.html
+├── birth-window1.html
+├── marriage-window2.html
+├── death-window3.html
+├── correction-window4.html
+├── tv-display.html
+├── css/
+│   ├── styles.css              (shared splash screen styles — distinct palette)
+│   ├── base.css                (shared reset + palette for staff/TV pages)
+│   └── <page>.css              (one per staff/display page — layout + --accent color)
+├── js/
+│   ├── app.js                  (splash screen + "Get a Queue Number" logic)
+│   ├── config.js                (Supabase project URL + anon key)
+│   ├── supabase-client.js       (shared data-access layer, see below)
+│   └── <page>.js                (one per staff/display page)
+├── images/
+│   ├── rosario-seal.jpg
+│   └── bagong-pilipinas.webp
+└── supabase/
+    └── schema.sql               (run once in your Supabase project)
+```
+
+## Running locally
+
+No build step required.
+
+1. Open the folder in VS Code.
+2. Install the **Live Server** extension (by Ritwick Dey).
+3. Right-click `index.html` → **Open with Live Server**.
+
+Or just open any `.html` file directly in a browser — everything is
+self-contained via relative paths (`css/`, `js/`, `images/`).
+
+## Backend — Supabase
+
+Data is stored in a **Supabase** Postgres project (previously Firebase
+Realtime Database).
+
+### Setup
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. Open **SQL Editor → New query**, paste in the contents of
+   `supabase/schema.sql`, and run it. This creates every table the app
+   needs (`queue`, `service_counters`, `serving_numbers`, `active_windows`,
+   `daily_counts`, `audit_log`, `backups`, `staff_roles`) plus Row Level
+   Security policies.
+3. Open **Project Settings → API** and copy:
+   - **Project URL** → paste into `SUPABASE_URL` in `js/config.js`
+   - **anon public** key → paste into `SUPABASE_ANON_KEY` in `js/config.js`
+
+> Like the Firebase Web API key before it, the Supabase **anon** key is
+> safe to expose client-side by design — it's not a secret credential.
+> Actual data access is controlled by the Row Level Security policies in
+> `supabase/schema.sql`, not by hiding this value.
+
+### How pages talk to Supabase
+
+Every page loads `js/config.js` then `js/supabase-client.js` before its own
+script. `supabase-client.js` provides `fbGet(path)` / `fbSet(path, data)` /
+`fbUpdate(path, data)` — the same function names and call signatures the
+pages already used against Firebase — so each page's own logic didn't need
+to change, only what's underneath. It translates Firebase-style tree paths
+(e.g. `queue/B001`, `counters`) into Supabase table queries.
+
+## Staff login
+
+The staff-facing pages (`birth-window1.html`, `marriage-window2.html`,
+`death-window3.html`, `correction-window4.html`) require sign-in via
+**Supabase Auth** (email/password).
+
+### Creating a staff account
+
+1. Supabase dashboard → **Authentication → Users → Add user**. Set an
+   email and password.
+2. Copy that user's **UID**.
+3. In **SQL Editor**, assign their role:
+   ```sql
+   insert into staff_roles (user_id, role, display_name)
+   values ('<uid>', 'birth', 'Fe Dimaculangan');
+   ```
+   `display_name` is optional — if left out, "Handled By" falls back to
+   showing the account's email instead.
+   Role must be one of: `birth`, `marriage`, `death`, `correction`, or
+   `admin` (an `admin` account can sign into every window).
+
+## Known limitation
+
+Ticket numbers are assigned with a read-then-increment (`fbGet('counters')`
+→ `fbUpdate('counters', ...)`), not an atomic database operation. Two
+people submitting at the exact same instant could theoretically be handed
+the same number. This mirrors the original Firebase implementation's
+behavior — worth hardening with a Postgres function
+(`increment_and_return`) if this becomes a real-world issue under load.

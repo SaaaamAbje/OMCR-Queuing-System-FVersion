@@ -68,8 +68,10 @@ function updateButtonLabels() {
         backTextEl.textContent = BTN_LABELS.back[currentLang];
 }
 /* ── SAFE ICON REFRESH ── */
-function refreshIcons() { if (window.lucide)
-    lucide.createIcons(); }
+function refreshIcons() {
+    if (window.lucide)
+        lucide.createIcons();
+}
 /* ── STATE ── */
 const SVC_MAP = {
     B: { name: 'Birth Certificate', window: 'Window 1', icon: 'file-plus' },
@@ -92,7 +94,7 @@ updateClock();
 /* ── STEP PROGRESS ── */
 function updateProgress(step) {
     document.getElementById('step-num').textContent = step;
-    ['1', '2', '3'].forEach((n, i) => {
+    ['1', '2', '3', '4'].forEach((n, i) => {
         const lbl = document.getElementById(`lbl-${n}`);
         const fill = document.getElementById(`fill-${n}`);
         const stepN = i + 1;
@@ -123,7 +125,7 @@ function showStep(n) {
     const btnBack = document.getElementById('btn-back');
     const btnNext = document.getElementById('btn-next');
     btnBack.style.display = n > 1 ? '' : 'none';
-    if (n === 3) {
+    if (n === 4) {
         btnNext.innerHTML = `<span class="btn-text" id="btn-next-text">${BTN_LABELS.submit[currentLang]}</span> ${SVG_CHECK}`;
         btnNext.className = 'btn btn-green';
     }
@@ -152,6 +154,12 @@ function goNext() {
         showStep(3);
     }
     else if (currentStep === 3) {
+        if (!validateStep3())
+            return;
+        populateConfirm();
+        showStep(4);
+    }
+    else if (currentStep === 4) {
         submitRequest();
     }
 }
@@ -167,6 +175,25 @@ function validateStep1() {
     return true;
 }
 function validateStep2() {
+    let valid = true;
+    const ownerName = document.getElementById('owner-name');
+    const ownerRelationship = document.getElementById('owner-relationship');
+    [ownerName, ownerRelationship].forEach(el => {
+        el.classList.remove('error');
+    });
+    if (!ownerName.value.trim()) {
+        ownerName.classList.add('error');
+        valid = false;
+    }
+    if (!ownerRelationship.value) {
+        ownerRelationship.classList.add('error');
+        valid = false;
+    }
+    if (!valid)
+        showToast(currentLang === 'fil' ? 'Punan ang mga kinakailangang field.' : 'Please fill in the required fields.', 'error');
+    return valid;
+}
+function validateStep3() {
     let valid = true;
     const fname = document.getElementById('fname');
     const lname = document.getElementById('lname');
@@ -188,13 +215,15 @@ function validateStep2() {
         valid = false;
     }
     if (!valid)
-        showToast('⚠️', currentLang === 'fil' ? 'Punan ang mga kinakailangang field.' : 'Please fill in the required fields.', 'error');
+        showToast(currentLang === 'fil' ? 'Punan ang mga kinakailangang field.' : 'Please fill in the required fields.', 'error');
     return valid;
 }
 /* ── CONFIRM ── */
 function populateConfirm() {
     const svc = document.querySelector('input[name="service"]:checked');
     const pur = document.querySelector('input[name="purpose"]:checked');
+    const ownerName = document.getElementById('owner-name').value.trim();
+    const ownerRelationship = document.getElementById('owner-relationship');
     const fname = document.getElementById('fname').value.trim();
     const lname = document.getElementById('lname').value.trim();
     const contact = document.getElementById('contact').value.trim();
@@ -203,6 +232,10 @@ function populateConfirm() {
         const s = SVC_MAP[svc.value];
         document.getElementById('confirm-svc-name').textContent = s.name;
     }
+    document.getElementById('c-owner-name').textContent = ownerName || '—';
+    document.getElementById('c-owner-relationship').textContent = ownerRelationship.selectedOptions.length
+        ? ownerRelationship.selectedOptions[0].textContent
+        : '—';
     document.getElementById('c-name').textContent = fname && lname ? `${fname} ${lname}` : '—';
     document.getElementById('c-contact').textContent = contact || '—';
     document.getElementById('c-purpose').textContent = pur ? pur.value : 'Not specified';
@@ -212,49 +245,54 @@ function populateConfirm() {
 function submitRequest() {
     const btn = document.getElementById('btn-next');
     btn.classList.add('loading');
-    // Simulate network delay
-    setTimeout(() => {
+    issueNumber()
+        .catch(() => {
+        showToast(currentLang === 'fil'
+            ? 'May problema sa koneksyon. Subukang muli.'
+            : 'Connection problem. Please try again.', 'error');
+    })
+        .finally(() => {
         btn.classList.remove('loading');
-        issueNumber();
-    }, 1100);
+    });
 }
-function issueNumber() {
+async function issueNumber() {
     const svc = document.querySelector('input[name="service"]:checked');
     if (!svc)
         return;
     const code = svc.value;
-    // Get & update state
-    let state;
-    try {
-        state = JSON.parse(localStorage.getItem('omcr_queue')) || defaultState();
-    }
-    catch (e) {
-        state = defaultState();
-    }
-    state.counters[code] = (state.counters[code] || 0) + 1;
-    const num = state.counters[code];
-    const numStr = code + String(num).padStart(3, '0');
-    if (!state.globalQueue)
-        state.globalQueue = [];
-    state.globalQueue.push({ num: numStr, code, status: 'waiting', ts: Date.now() });
-    localStorage.setItem('omcr_queue', JSON.stringify(state));
-    // Fill ticket
-    const s = SVC_MAP[code];
+    const pur = document.querySelector('input[name="purpose"]:checked');
+    const ownerName = document.getElementById('owner-name').value.trim();
+    const ownerRelationship = document.getElementById('owner-relationship').value;
     const fname = document.getElementById('fname').value.trim();
     const lname = document.getElementById('lname').value.trim();
-    const serving = state.serving[code] || 0;
-    const pos = Math.max(0, num - serving);
+    const contact = document.getElementById('contact').value.trim();
+    // Claim the next number for this service (real shared counter, not local-only)
+    const counters = (await fbGet('counters')) || { B: 0, M: 0, D: 0, C: 0 };
+    const num = (counters[code] || 0) + 1;
+    const numStr = code + String(num).padStart(3, '0');
+    await fbUpdate('counters', { [code]: num });
+    // Write the ticket into the real shared queue so staff/TV display see it
+    await fbSet(`queue/${numStr}`, {
+        code,
+        status: 'waiting',
+        name: fname ? `${fname} ${lname}` : null,
+        contact: contact || null,
+        purpose: pur ? pur.value : null,
+        ownerName: ownerName || null,
+        relationship: ownerRelationship || null,
+    });
+    // Fill ticket
+    const s = SVC_MAP[code];
+    const serving = (await fbGet('serving')) || { B: 0, M: 0, D: 0, C: 0 };
+    const pos = Math.max(0, num - (serving[code] || 0));
     document.getElementById('ticket-number').textContent = numStr;
     document.getElementById('ticket-svc').textContent = `${s.name} · ${s.window}`;
     document.getElementById('ticket-name').textContent = fname ? `${fname} ${lname}` : 'Queue Member';
     document.getElementById('ticket-time').textContent = new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', hour12: true });
     document.getElementById('ticket-position').textContent = pos <= 1
-        ? (currentLang === 'fil' ? '🟢 Ikaw ang susunod!' : '🟢 You are next!')
-        : (currentLang === 'fil' ? `📍 Puwesto ${pos} sa pila` : `📍 Position ${pos} in queue`);
+        ? (currentLang === 'fil' ? 'Ikaw ang susunod!' : 'You are next!')
+        : (currentLang === 'fil' ? `Puwesto ${pos} sa pila` : `Position ${pos} in queue`);
     showSuccess();
-}
-function defaultState() {
-    return { counters: { B: 0, M: 0, D: 0, C: 0 }, serving: { B: 0, M: 0, D: 0, C: 0 }, activeWindow: null, globalQueue: [], treasuryAlert: null };
 }
 /* ── SUCCESS MICRO-INTERACTION ── */
 function showSuccess() {
@@ -274,18 +312,20 @@ function showSuccess() {
     }, 700);
     // Confetti
     setTimeout(launchConfetti, 800);
-    showToast('🎉', currentLang === 'fil' ? 'Naibigay na ang inyong numero!' : 'Your number has been issued!', 'success');
+    showToast(currentLang === 'fil' ? 'Naibigay na ang inyong numero!' : 'Your number has been issued!', 'success');
 }
 function getAnotherNumber() {
     // Reset everything
     document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    document.getElementById('owner-name').value = '';
+    document.getElementById('owner-relationship').value = '';
     document.getElementById('fname').value = '';
     document.getElementById('lname').value = '';
     document.getElementById('contact').value = '';
     document.getElementById('notes').value = '';
     document.getElementById('copies').value = '1';
     document.getElementById('svc-error').style.display = 'none';
-    ['fname', 'lname', 'contact'].forEach(id => document.getElementById(id).classList.remove('error'));
+    ['owner-name', 'owner-relationship', 'fname', 'lname', 'contact'].forEach(id => document.getElementById(id).classList.remove('error'));
     // Reset success screen
     document.getElementById('success-screen').classList.remove('show');
     document.getElementById('success-ring-prog').classList.remove('animate');
@@ -323,11 +363,11 @@ function launchConfetti() {
     }
 }
 /* ── TOAST ── */
-function showToast(icon, msg, type = 'info') {
+function showToast(msg, type = 'info') {
     const area = document.getElementById('toast-area');
     const t = document.createElement('div');
     t.className = `toast ${type}`;
-    t.innerHTML = `${icon} <span>${msg}</span>`;
+    t.innerHTML = `<span>${msg}</span>`;
     area.appendChild(t);
     setTimeout(() => {
         t.classList.add('removing');

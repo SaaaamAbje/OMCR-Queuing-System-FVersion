@@ -97,14 +97,16 @@
  <div class="step-progress" id="step-progress">
   <div class="step-labels">
    <span class="step-label active" id="lbl-1" data-en="Service" data-fil="Serbisyo">Service</span>
-   <span class="step-label" id="lbl-2" data-en="Details" data-fil="Detalye">Details</span>
-   <span class="step-label" id="lbl-3" data-en="Confirm" data-fil="Kumpirma">Confirm</span>
+   <span class="step-label" id="lbl-2" data-en="Document Owner" data-fil="May-ari">Document Owner</span>
+   <span class="step-label" id="lbl-3" data-en="Details" data-fil="Detalye">Details</span>
+   <span class="step-label" id="lbl-4" data-en="Confirm" data-fil="Kumpirma">Confirm</span>
   </div>
   <div class="step-track">
    <div class="step-seg"><div class="step-fill" id="fill-1"></div></div>
    <div class="step-seg"><div class="step-fill" id="fill-2"></div></div>
    <div class="step-seg"><div class="step-fill" id="fill-3"></div></div>
-   <div class="step-counter">Step <span id="step-num">1</span> of 3</div>
+   <div class="step-seg"><div class="step-fill" id="fill-4"></div></div>
+   <div class="step-counter">Step <span id="step-num">1</span> of 4</div>
   </div>
  </div>
 
@@ -148,7 +150,7 @@
        <div class="svc-series">C-Series · Window 4</div>
       </label>
      </div>
-     <div id="svc-error" style="display:none;font-size:.68rem;color:var(--red);font-weight:700;margin-top:.62rem;" data-en="⚠ Please select a service to continue." data-fil="⚠ Pumili ng serbisyo upang magpatuloy.">⚠ Please select a service to continue.</div>
+     <div id="svc-error" style="display:none;font-size:.68rem;color:var(--red);font-weight:700;margin-top:.62rem;" data-en="Please select a service to continue." data-fil="Pumili ng serbisyo upang magpatuloy.">Please select a service to continue.</div>
     </div>
    </div>
 
@@ -181,8 +183,42 @@
    </div>
   </div>
 
-  <!-- ══ STEP 2: PERSONAL DETAILS ══ -->
+  <!-- ══ STEP 2: DOCUMENT OWNER ══ -->
   <div class="step-panel" id="step-2">
+   <div class="form-card">
+    <div class="form-card-header">
+     <i data-lucide="file-text" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
+     <div class="form-card-title" data-en="Whose document is this?" data-fil="Kaninong dokumento ito?">Whose document is this?</div>
+    </div>
+    <div class="form-card-body">
+     <div class="field-group">
+      <div class="field">
+       <label for="owner-name"><span data-en="Full Name on the Document" data-fil="Buong Pangalan sa Dokumento">Full Name on the Document</span> <span class="req">*</span></label>
+       <input type="text" id="owner-name" placeholder="e.g. Juan Dela Cruz" data-en-placeholder="e.g. Juan Dela Cruz" data-fil-placeholder="hal. Juan Dela Cruz" autocomplete="off" inputmode="text">
+       <span class="field-hint" data-en="The person named on the birth / marriage / death record being requested." data-fil="Ang taong nakalagay sa rekord na hinihiling.">The person named on the birth / marriage / death record being requested.</span>
+       <span class="field-error" data-en="Please enter the name on the document." data-fil="Ilagay ang pangalan sa dokumento.">Please enter the name on the document.</span>
+      </div>
+      <div class="field">
+       <label for="owner-relationship"><span data-en="Your Relationship to This Person" data-fil="Ugnayan Mo sa Taong Ito">Your Relationship to This Person</span> <span class="req">*</span></label>
+       <select id="owner-relationship">
+        <option value="" data-en="Select relationship" data-fil="Pumili ng ugnayan">Select relationship</option>
+        <option value="Self" data-en="Self (this is my own document)" data-fil="Ako mismo (sariling dokumento)">Self (this is my own document)</option>
+        <option value="Parent" data-en="Parent" data-fil="Magulang">Parent</option>
+        <option value="Child" data-en="Child" data-fil="Anak">Child</option>
+        <option value="Spouse" data-en="Spouse" data-fil="Asawa">Spouse</option>
+        <option value="Sibling" data-en="Sibling" data-fil="Kapatid">Sibling</option>
+        <option value="Guardian" data-en="Legal Guardian / Representative" data-fil="Tagapag-alaga / Kinatawan">Legal Guardian / Representative</option>
+        <option value="Other" data-en="Other" data-fil="Iba pa">Other</option>
+       </select>
+       <span class="field-error" data-en="Please select your relationship." data-fil="Pumili ng ugnayan.">Please select your relationship.</span>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- ══ STEP 3: REQUESTOR INFORMATION ══ -->
+  <div class="step-panel" id="step-3">
    <div class="form-card">
     <div class="form-card-header">
      <i data-lucide="user" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
@@ -225,8 +261,8 @@
    </div>
   </div>
 
-  <!-- ══ STEP 3: CONFIRM ══ -->
-  <div class="step-panel" id="step-3">
+  <!-- ══ STEP 4: CONFIRM ══ -->
+  <div class="step-panel" id="step-4">
    <div class="confirm-card">
     <div class="confirm-header">
      <div class="confirm-header-label" data-en="Your Request Summary" data-fil="Buod ng Iyong Kahilingan">Your Request Summary</div>
@@ -234,8 +270,16 @@
     </div>
     <div class="confirm-body" id="confirm-body">
      <div class="confirm-row">
+      <div class="confirm-icon"><i data-lucide="file-text" class="lucide"></i></div>
+      <div><div class="confirm-key" data-en="Document Owner" data-fil="May-ari ng Dokumento">Document Owner</div><div class="confirm-val" id="c-owner-name">—</div></div>
+     </div>
+     <div class="confirm-row">
+      <div class="confirm-icon"><i data-lucide="users" class="lucide"></i></div>
+      <div><div class="confirm-key" data-en="Relationship" data-fil="Ugnayan">Relationship</div><div class="confirm-val" id="c-owner-relationship">—</div></div>
+     </div>
+     <div class="confirm-row">
       <div class="confirm-icon"><i data-lucide="user" class="lucide"></i></div>
-      <div><div class="confirm-key" data-en="Full Name" data-fil="Buong Pangalan">Full Name</div><div class="confirm-val" id="c-name">—</div></div>
+      <div><div class="confirm-key" data-en="Requestor" data-fil="Humihiling">Requestor</div><div class="confirm-val" id="c-name">—</div></div>
      </div>
      <div class="confirm-row">
       <div class="confirm-icon"><i data-lucide="phone" class="lucide"></i></div>
@@ -330,6 +374,8 @@
 <!-- Toast area -->
 <div class="toast-area" id="toast-area"></div>
 
+<script src="js/config.js"></script>
+<script src="js/supabase-client.js"></script>
 <script src="js/app.js"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" onload="refreshIcons()"></script>
 </body>

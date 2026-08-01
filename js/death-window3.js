@@ -1,7 +1,7 @@
 const SVC_CODE = 'D';
 const SVC_NAME = 'Death Certificate';
 const SVC_WIN = 'Window 3';
-const STAFF_NAME = 'Leah Espeleta';
+let STAFF_NAME = 'Leah Espeleta'; // fallback until real login; overwritten with the logged-in user's display_name
 const REQUIRED_ROLE = 'death';
 const ALL_SVCS = {
     B: { name: 'Birth Certificate', window: 'Window 1' },
@@ -17,24 +17,10 @@ let activePriority = null;
 let transferTarget = null;
 let currentUser = null;
 let modalCallback = null;
-/* ── FIREBASE ── */
-async function fbGet(path) {
-    const r = await fetch(`${FIREBASE_URL}/${path}.json`, { method: 'GET', mode: 'cors' });
-    if (!r.ok)
-        throw new Error('HTTP ' + r.status);
-    return r.json();
-}
-async function fbSet(path, data) {
-    const r = await fetch(`${FIREBASE_URL}/${path}.json`, { method: 'PUT', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    if (!r.ok)
-        throw new Error('HTTP ' + r.status);
-}
-async function fbUpdate(path, data) {
-    const r = await fetch(`${FIREBASE_URL}/${path}.json`, { method: 'PATCH', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    if (!r.ok)
-        throw new Error('HTTP ' + r.status);
-}
-/* ── AUTH ── */
+/* ── AUTH ──
+   fbGet/fbSet/fbUpdate now come from js/supabase-client.js (loaded before
+   this file) — same call signatures as before, backed by Supabase instead
+   of Firebase. Only the sign-in flow itself changed. */
 async function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -49,20 +35,8 @@ async function doLogin() {
     btn.textContent = 'Signing in...';
     btn.disabled = true;
     try {
-        const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FB_API_KEY}`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, returnSecureToken: true })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-            errEl.textContent = 'Incorrect email or password.';
-            errEl.classList.add('show');
-            btn.textContent = 'Sign In';
-            btn.disabled = false;
-            return;
-        }
-        const r2 = await fetch(`${FIREBASE_URL}/staff_roles/${data.localId}.json?auth=${data.idToken}`);
-        const roleData = r2.ok ? await r2.json() : null;
+        const { localId, idToken } = await sbSignIn(email, password);
+        const roleData = await sbGetStaffRole(localId, idToken);
         if (!roleData) {
             errEl.textContent = 'Account not configured. Contact admin.';
             errEl.classList.add('show');
@@ -70,20 +44,22 @@ async function doLogin() {
             btn.disabled = false;
             return;
         }
-        if (roleData.role !== REQUIRED_ROLE && roleData.role !== 'admin') {
+        const { role, displayName } = roleData;
+        if (role !== REQUIRED_ROLE && role !== 'admin') {
             errEl.textContent = `Access denied. This portal is for ${REQUIRED_ROLE} window only.`;
             errEl.classList.add('show');
             btn.textContent = 'Sign In';
             btn.disabled = false;
             return;
         }
-        currentUser = { uid: data.localId, email, displayName: roleData.displayName || email, role: roleData.role };
+        STAFF_NAME = displayName || email;
+        currentUser = { uid: localId, email, displayName: STAFF_NAME, role };
         sessionStorage.setItem('omcr_session_' + REQUIRED_ROLE, JSON.stringify(currentUser));
         document.getElementById('login-overlay').classList.add('hidden');
-        document.getElementById('staff-pill').textContent = '👤 ' + (roleData.displayName || email);
+        document.getElementById('staff-pill').textContent = STAFF_NAME;
     }
     catch (e) {
-        errEl.textContent = 'Network error.';
+        errEl.textContent = 'Incorrect email or password.';
         errEl.classList.add('show');
         btn.textContent = 'Sign In';
         btn.disabled = false;
@@ -106,7 +82,7 @@ function doLogout() {
         if (s) {
             currentUser = JSON.parse(s);
             document.getElementById('login-overlay').classList.add('hidden');
-            document.getElementById('staff-pill').textContent = '👤 ' + currentUser.displayName;
+            document.getElementById('staff-pill').textContent = currentUser.displayName;
         }
     }
     catch (e) {
@@ -143,10 +119,10 @@ async function refresh() {
         const canCall = waiting > 0 && !isActive;
         const row = document.getElementById('action-row');
         if (isActive) {
-            row.innerHTML = `<button class="btn btn-done" onclick="doneServing()">✓ Done</button><button class="btn btn-recall" onclick="recallNumber()">📣 Recall</button><button class="btn btn-skip" onclick="confirmSkip()">⏭ Skip</button><button class="btn btn-transfer" onclick="openTransfer()">↗ Transfer</button><button class="btn btn-reset" onclick="confirmReset()">Reset</button>`;
+            row.innerHTML = `<button class="btn btn-done" onclick="doneServing()">Done</button><button class="btn btn-recall" onclick="recallNumber()">Recall</button><button class="btn btn-skip" onclick="confirmSkip()">Skip</button><button class="btn btn-transfer" onclick="openTransfer()">Transfer</button><button class="btn btn-reset" onclick="confirmReset()">Reset</button>`;
         }
         else {
-            row.innerHTML = `<button class="btn btn-call" ${!canCall ? 'disabled' : ''} onclick="callNext()">▶ Call Next Number</button><button class="btn btn-reset" onclick="confirmReset()">Reset</button>`;
+            row.innerHTML = `<button class="btn btn-call" ${!canCall ? 'disabled' : ''} onclick="callNext()">Call Next Number</button><button class="btn btn-reset" onclick="confirmReset()">Reset</button>`;
         }
         const q = queueData ? Object.values(queueData).filter(e => e.code === SVC_CODE && e.status === 'waiting').sort((a, b) => (a.num || '').localeCompare(b.num || '')) : [];
         const nl = document.getElementById('next-list');
@@ -154,7 +130,7 @@ async function refresh() {
         document.getElementById('sync-label').textContent = 'Live · ' + new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
     catch (e) {
-        document.getElementById('sync-label').textContent = '⚠ Offline';
+        document.getElementById('sync-label').textContent = 'Offline';
     }
 }
 /* ── CALL NEXT ── */
@@ -165,7 +141,7 @@ async function callNext() {
         const served = (serving || {})[SVC_CODE] || 0;
         const next = served + 1;
         if (next > total) {
-            showToast('ℹ️', 'No clients waiting.', 'info');
+            showToast('No clients waiting.', 'info');
             return;
         }
         const numStr = SVC_CODE + String(next).padStart(3, '0');
@@ -179,7 +155,7 @@ async function callNext() {
         currentServing = { ...(entry || {}), num: numStr, handledBy: STAFF_NAME };
         updateCallerCard(numStr, currentServing);
         addLog(numStr, `Called to ${SVC_WIN}`, 'called');
-        showToast('📣', `Now serving <strong>${numStr}</strong>`, 'success');
+        showToast(`Now serving <strong>${numStr}</strong>`, 'success');
         try {
             const today = todayKey();
             const cur = await fbGet(`daily/${today}`) || 0;
@@ -189,7 +165,7 @@ async function callNext() {
         refresh();
     }
     catch (e) {
-        showToast('❌', 'Error: ' + e.message, 'error');
+        showToast('Error: ' + e.message, 'error');
     }
 }
 async function doneServing() {
@@ -199,7 +175,7 @@ async function doneServing() {
         await fbUpdate('activeWindows', { [SVC_CODE]: false });
         await fbUpdate(`queue/${numStr}`, { status: 'done' });
         addLog(numStr, 'Completed', 'info');
-        showToast('✅', `Done serving ${numStr}`, 'success');
+        showToast(`Done serving ${numStr}`, 'success');
         currentServing = null;
         document.getElementById('cp-body').innerHTML = '<div class="cp-empty">Press "Call Next Number" to continue.</div>';
         document.getElementById('cp-num').textContent = '—';
@@ -207,7 +183,7 @@ async function doneServing() {
         refresh();
     }
     catch (e) {
-        showToast('❌', 'Error: ' + e.message, 'error');
+        showToast('Error: ' + e.message, 'error');
     }
 }
 async function recallNumber() {
@@ -215,16 +191,16 @@ async function recallNumber() {
         const s = (await fbGet('serving') || {});
         const num = s[SVC_CODE] || 0;
         if (!num) {
-            showToast('ℹ️', 'No number being served.', 'info');
+            showToast('No number being served.', 'info');
             return;
         }
         const numStr = SVC_CODE + String(num).padStart(3, '0');
         await fbUpdate(`queue/${numStr}`, { recalledAt: Date.now(), status: 'serving' });
         addLog(numStr, 'Recalled', 'called');
-        showToast('📣', `Recalled ${numStr}`, 'success');
+        showToast(`Recalled ${numStr}`, 'success');
     }
     catch (e) {
-        showToast('❌', 'Error: ' + e.message, 'error');
+        showToast('Error: ' + e.message, 'error');
     }
 }
 function confirmSkip() {
@@ -235,7 +211,7 @@ function confirmSkip() {
             await fbUpdate(`queue/${numStr}`, { status: 'skipped' });
             await fbUpdate('activeWindows', { [SVC_CODE]: false });
             addLog(numStr, 'Skipped — client did not show', 'reset');
-            showToast('⏭', `${numStr} skipped`, 'danger');
+            showToast(`${numStr} skipped`, 'danger');
             currentServing = null;
             document.getElementById('cp-body').innerHTML = '<div class="cp-empty">Number skipped.</div>';
             document.getElementById('cp-num').textContent = '—';
@@ -243,7 +219,7 @@ function confirmSkip() {
             refresh();
         }
         catch (e) {
-            showToast('❌', 'Error: ' + e.message, 'error');
+            showToast('Error: ' + e.message, 'error');
         }
     });
 }
@@ -259,7 +235,7 @@ function confirmReset() {
                     await fbSet(`queue/${key}`, null);
             }
             addLog(null, 'Queue reset', 'reset');
-            showToast('🔄', 'Queue reset', 'danger');
+            showToast('Queue reset', 'danger');
             currentServing = null;
             document.getElementById('cp-body').innerHTML = '<div class="cp-empty">Queue was reset.</div>';
             document.getElementById('cp-num').textContent = '—';
@@ -267,7 +243,7 @@ function confirmReset() {
             refresh();
         }
         catch (e) {
-            showToast('❌', 'Reset failed: ' + e.message, 'error');
+            showToast('Reset failed: ' + e.message, 'error');
         }
     });
 }
@@ -275,7 +251,7 @@ function confirmReset() {
 let _transferTarget = null;
 function openTransfer() {
     if (!currentServing) {
-        showToast('ℹ️', 'No client being served.', 'info');
+        showToast('No client being served.', 'info');
         return;
     }
     const opts = document.getElementById('transfer-options');
@@ -301,7 +277,7 @@ async function confirmTransfer() {
         await fbUpdate(`queue/${numStr}`, { status: 'transferred', transferredTo: newNum });
         await fbUpdate('activeWindows', { [SVC_CODE]: false });
         addLog(numStr, `Transferred → ${newNum}`, 'info');
-        showToast('↗️', `${numStr} transferred to ${newNum}`, 'success');
+        showToast(`${numStr} transferred to ${newNum}`, 'success');
         closeTransferModal();
         currentServing = null;
         document.getElementById('cp-body').innerHTML = '<div class="cp-empty">Client transferred.</div>';
@@ -310,7 +286,7 @@ async function confirmTransfer() {
         refresh();
     }
     catch (e) {
-        showToast('❌', 'Transfer failed: ' + e.message, 'error');
+        showToast('Transfer failed: ' + e.message, 'error');
     }
 }
 function closeTransferModal() { document.getElementById('transfer-modal').classList.remove('show'); _transferTarget = null; }
@@ -327,7 +303,7 @@ function updateCallerCard(numStr, entry) {
     <div class="cp-section"><div class="cp-section-label">Document Owner</div><div class="cp-section-value">${entry.ownerName || '—'}</div></div>
     <div class="cp-section"><div class="cp-section-label">Requestor</div><div class="cp-section-value">${entry.name || '—'}</div><div class="cp-section-sub">${entry.relationship || ''}</div></div>
     <div class="cp-section"><div class="cp-section-label">Purpose</div><div class="cp-section-value" style="font-size:.82rem;">${entry.purpose || 'Not specified'}</div></div>
-    <div class="cp-handled"><div class="cp-handled-label">Handled By</div><div class="cp-handled-value">🧑‍💼 ${STAFF_NAME}</div></div>`;
+    <div class="cp-handled"><div class="cp-handled-label">Handled By</div><div class="cp-handled-value">${STAFF_NAME}</div></div>`;
 }
 /* ── NOTES ── */
 async function saveNote() {
@@ -342,17 +318,20 @@ async function saveNote() {
         addLog(currentServing.num, 'Note saved', 'info');
     }
     catch (e) {
-        showToast('❌', 'Failed to save note', 'error');
+        showToast('Failed to save note', 'error');
     }
 }
 /* ── PRIORITY ── */
 function setPriority(type) {
     activePriority = activePriority === type ? null : type;
-    ['senior', 'pwd', 'pregnant'].forEach(t => { const b = document.getElementById(`pri-btn-${t}`); if (b)
-        b.classList.remove(`active-${t}`); });
+    ['senior', 'pwd', 'pregnant'].forEach(t => {
+        const b = document.getElementById(`pri-btn-${t}`);
+        if (b)
+            b.classList.remove(`active-${t}`);
+    });
     if (activePriority) {
         document.getElementById(`pri-btn-${activePriority}`)?.classList.add(`active-${activePriority}`);
-        showToast('⭐', `Priority: ${activePriority.toUpperCase()}`, 'info');
+        showToast(`Priority: ${activePriority.toUpperCase()}`, 'info');
     }
 }
 /* ── HISTORY ── */
@@ -377,7 +356,7 @@ async function searchHistory() {
        </div>
        <div class="history-item-name">Owner: ${e.ownerName || '—'} · Req: ${e.name || '—'}</div>
        <div class="history-item-meta">${e.relationship || ''} · ${e.handledBy ? 'By: ' + e.handledBy : ''}</div>
-       ${e.staffNote ? `<div class="history-note">📝 ${e.staffNote}</div>` : ''}
+       ${e.staffNote ? `<div class="history-note">${e.staffNote}</div>` : ''}
       </div>`).join('');
     }
     catch (e) {
@@ -408,7 +387,7 @@ function renderLog() {
     }
     body.innerHTML = activityLog.map(e => `<div class="log-item"><div class="log-time">${e.time}</div><div class="log-num">${e.num || '—'}</div><div class="log-action">${e.action}</div></div>`).join('');
 }
-function clearLog() { activityLog = []; renderLog(); showToast('🗑️', 'Log cleared', 'info'); }
+function clearLog() { activityLog = []; renderLog(); showToast('Log cleared', 'info'); }
 /* ── AUDIT ── */
 async function writeAudit(action, num, detail, type) {
     const now = new Date();
@@ -434,7 +413,7 @@ function renderAuditLog() {
 }
 function exportAuditLog() {
     if (!auditLog.length) {
-        showToast('ℹ️', 'No entries to export.', 'info');
+        showToast('No entries to export.', 'info');
         return;
     }
     const csv = [['Time', 'Ticket', 'Action', 'Staff', 'Window'], ...auditLog.map(e => [e.time, e.num, e.action, e.staff, e.window])].map(r => r.map(v => `"${(v || '').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -448,31 +427,36 @@ async function backupToFirebase() {
     try {
         const [c, s] = await Promise.all([fbGet('counters'), fbGet('serving')]);
         await fbSet(`backups/manual_${new Date().toISOString().replace(/[:.]/g, '-')}`, { counters: c, serving: s, ts: new Date().toISOString(), by: STAFF_NAME, window: SVC_WIN });
-        showToast('💾', 'Backup saved', 'success');
+        showToast('Backup saved', 'success');
     }
     catch (e) {
-        showToast('❌', 'Backup failed', 'error');
+        showToast('Backup failed', 'error');
     }
 }
-setInterval(async () => { try {
-    const [c, s] = await Promise.all([fbGet('counters'), fbGet('serving')]);
-    await fbSet(`backups/auto_${new Date().toISOString().replace(/[:.]/g, '-')}`, { counters: c, serving: s, autoBackup: true, ts: new Date().toISOString() });
-}
-catch (e) { } }, 7200000);
+setInterval(async () => {
+    try {
+        const [c, s] = await Promise.all([fbGet('counters'), fbGet('serving')]);
+        await fbSet(`backups/auto_${new Date().toISOString().replace(/[:.]/g, '-')}`, { counters: c, serving: s, autoBackup: true, ts: new Date().toISOString() });
+    }
+    catch (e) { }
+}, 7200000);
 /* ── TOAST ── */
-function showToast(icon, msg, type = 'info') {
+function showToast(msg, type = 'info') {
     const a = document.getElementById('toast-area');
     const t = document.createElement('div');
     t.className = `toast ${type}`;
-    t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+    t.innerHTML = `<span>${msg}</span>`;
     a.appendChild(t);
     setTimeout(() => { t.classList.add('removing'); setTimeout(() => t.remove(), 260); }, 3500);
 }
 /* ── MODAL ── */
 function openModal(title, body, cb) { document.getElementById('modal-title').textContent = title; document.getElementById('modal-body').textContent = body; modalCallback = cb; document.getElementById('modal-backdrop').classList.add('show'); }
 function closeModal() { document.getElementById('modal-backdrop').classList.remove('show'); modalCallback = null; }
-document.getElementById('modal-confirm-btn').onclick = () => { closeModal(); if (modalCallback)
-    modalCallback(); };
+document.getElementById('modal-confirm-btn').onclick = () => {
+    closeModal();
+    if (modalCallback)
+        modalCallback();
+};
 /* ── CLOCK ── */
 function updateClock() { document.getElementById('topbar-clock').textContent = new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); }
 /* ── TODAY KEY ── */

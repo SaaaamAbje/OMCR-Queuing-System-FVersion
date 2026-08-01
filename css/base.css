@@ -1,0 +1,30 @@
+/* ── SHARED BASE (staff windows + TV display) ──
+   Included by: birth-window1.css, marriage-window2.css, death-window3.css,
+   correction-window4.css, tv-display.css.
+   Each of those keeps only its page-specific --accent (if any) and layout rules.
+   Note: the public splash screen (styles.css) uses a separate, distinct
+   palette by design and is NOT part of this shared base. */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --navy: #0d1b2e;
+  --navy-dark: #080f1a;
+  --navy-mid: #1a2b4a;
+  --gold: #c8922a;
+  --gold-light: #f0b429;
+  --bg: #eef2f7;
+  --white: #fff;
+  --border: #c8d5e2;
+  --text: #0d1b2a;
+  --text-2: #3d5470;
+  --text-muted: #6b7e94;
+  --red: #b91c1c;
+  --green: #15803d;
+}
