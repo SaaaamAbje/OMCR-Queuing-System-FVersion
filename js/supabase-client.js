@@ -52,6 +52,8 @@ function queueRowToEntry(row) {
         staffNote: row.staff_note,
         staffNoteBy: row.staff_note_by,
         staffNoteAt: row.staff_note_at,
+        voidedBy: row.voided_by,
+        voidedAt: row.voided_at,
         ts: row.created_at,
     };
 }
@@ -91,6 +93,10 @@ function entryToQueueRow(num, entry) {
         row.staff_note_by = entry.staffNoteBy;
     if ('staffNoteAt' in entry)
         row.staff_note_at = entry.staffNoteAt;
+    if ('voidedBy' in entry)
+        row.voided_by = entry.voidedBy;
+    if ('voidedAt' in entry)
+        row.voided_at = entry.voidedAt;
     return row;
 }
 /* ── fbGet / fbSet / fbUpdate: same signatures as before ── */

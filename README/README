@@ -63,8 +63,13 @@ Realtime Database).
 2. Open **SQL Editor → New query**, paste in the contents of
    `supabase/schema.sql`, and run it. This creates every table the app
    needs (`queue`, `service_counters`, `serving_numbers`, `active_windows`,
-   `daily_counts`, `audit_log`, `backups`, `staff_roles`) plus Row Level
-   Security policies.
+   `daily_counts`, `audit_log`, `backups`, `staff_roles`) plus role-scoped
+   Row Level Security policies (the public kiosk/TV display can only read
+   and create tickets; everything else requires a signed-in staff account).
+
+   If you already ran an earlier version of this schema, see the
+   migration notes near the bottom of `supabase/schema.sql` — there are
+   a few `alter table`/policy statements to run instead of the whole file.
 3. Open **Project Settings → API** and copy:
    - **Project URL** → paste into `SUPABASE_URL` in `js/config.js`
    - **anon public** key → paste into `SUPABASE_ANON_KEY` in `js/config.js`
@@ -103,6 +108,13 @@ The staff-facing pages (`birth-window1.html`, `marriage-window2.html`,
    showing the account's email instead.
    Role must be one of: `birth`, `marriage`, `death`, `correction`, or
    `admin` (an `admin` account can sign into every window).
+
+## Voiding a ticket
+
+If a customer leaves before being called, staff can click the small
+**×** button next to their ticket in "Up Next" to void it. Voided
+tickets are automatically skipped when calling the next number —
+no changes needed to the counters, they just get passed over.
 
 ## Known limitation
 

@@ -126,28 +126,54 @@ async function refresh() {
         }
         const q = queueData ? Object.values(queueData).filter(e => e.code === SVC_CODE && e.status === 'waiting').sort((a, b) => (a.num || '').localeCompare(b.num || '')) : [];
         const nl = document.getElementById('next-list');
-        nl.innerHTML = q.length === 0 ? '<div class="empty-next">No one waiting.</div>' : q.slice(0, 6).map((e, i) => `<div class="next-item ${i === 0 ? 'is-next' : ''}"><div class="next-pos">${i === 0 ? '→' : i + 1}</div><div class="next-num">${e.num}</div>${i === 0 ? '<div class="next-badge">Next</div>' : ''}</div>`).join('');
+        nl.innerHTML = q.length === 0 ? '<div class="empty-next">No one waiting.</div>' : q.slice(0, 6).map((e, i) => `<div class="next-item ${i === 0 ? 'is-next' : ''}"><div class="next-pos">${i === 0 ? '→' : i + 1}</div><div class="next-num">${e.num}</div>${i === 0 ? '<div class="next-badge">Next</div>' : ''}<button class="next-void-btn" onclick="voidTicket('${e.num}')" title="Void this ticket">×</button></div>`).join('');
         document.getElementById('sync-label').textContent = 'Live · ' + new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
     catch (e) {
         document.getElementById('sync-label').textContent = 'Offline';
     }
 }
+/* ── VOID TICKET ── */
+function voidTicket(numStr) {
+    openModal('Void This Ticket?', `${numStr} will be removed from the queue. This cannot be undone.`, async () => {
+        try {
+            await fbUpdate(`queue/${numStr}`, { status: 'voided', voidedBy: STAFF_NAME, voidedAt: Date.now() });
+            addLog(numStr, 'Voided — client left before being called', 'reset');
+            showToast(`${numStr} voided`, 'danger');
+            refresh();
+        }
+        catch (e) {
+            showToast('Error: ' + e.message, 'error');
+        }
+    });
+}
 /* ── CALL NEXT ── */
 async function callNext() {
     try {
         const [counters, serving] = await Promise.all([fbGet('counters'), fbGet('serving')]);
         const total = (counters || {})[SVC_CODE] || 0;
-        const served = (serving || {})[SVC_CODE] || 0;
-        const next = served + 1;
+        let served = (serving || {})[SVC_CODE] || 0;
+        let next = served + 1;
+        let entry = null;
+        let numStr = '';
+        while (next <= total) {
+            numStr = SVC_CODE + String(next).padStart(3, '0');
+            entry = await fbGet(`queue/${numStr}`);
+            if (entry && entry.status === 'voided') {
+                addLog(numStr, 'Voided ticket skipped', 'reset');
+                next++;
+                continue;
+            }
+            break;
+        }
         if (next > total) {
+            await fbUpdate('serving', { [SVC_CODE]: total });
             showToast('No clients waiting.', 'info');
             return;
         }
-        const numStr = SVC_CODE + String(next).padStart(3, '0');
-        await fbUpdate('serving', { [SVC_CODE]: next });
+        served = next;
+        await fbUpdate('serving', { [SVC_CODE]: served });
         await fbUpdate('activeWindows', { [SVC_CODE]: true });
-        const entry = await fbGet(`queue/${numStr}`);
         await fbUpdate(`queue/${numStr}`, { handledBy: STAFF_NAME, status: 'serving' });
         if (activePriority) {
             await fbUpdate(`queue/${numStr}`, { priority: activePriority });
