@@ -495,6 +495,86 @@ body {
   color: var(--navy);
 }
 
+/* TRANSACTION TYPE SELECTOR */
+.type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .65rem;
+}
+
+.type-radio {
+  display: none;
+}
+
+.type-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .55rem;
+  padding: 1.35rem .82rem;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--bg);
+  text-align: center;
+}
+
+.type-label:active {
+  transform: scale(.97);
+}
+
+.type-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--tag-bg);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+}
+
+.type-icon .lucide {
+  width: 24px;
+  height: 24px;
+  color: var(--text-2);
+  transition: color .2s;
+}
+
+.type-name {
+  font-size: .84rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.3;
+  transition: color .2s;
+}
+
+.type-desc {
+  font-size: .64rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  transition: color .2s;
+}
+
+.type-radio:checked + .type-label {
+  border-color: var(--navy);
+  background: #eef4ff;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.type-radio:checked + .type-label .type-icon {
+  background: var(--navy);
+}
+
+.type-radio:checked + .type-label .type-icon .lucide {
+  color: white;
+}
+
+.type-radio:checked + .type-label .type-name {
+  color: var(--navy);
+}
+
 /* PURPOSE TAGS */
 .purpose-grid {
   display: flex;

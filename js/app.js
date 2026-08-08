@@ -61,7 +61,7 @@ function updateButtonLabels() {
     const nextTextEl = document.getElementById('btn-next-text');
     const backTextEl = document.getElementById('btn-back-text');
     if (nextTextEl) {
-        const key = currentStep === 3 ? 'submit' : 'next';
+        const key = currentStep === 5 ? 'submit' : 'next';
         nextTextEl.textContent = BTN_LABELS[key][currentLang];
     }
     if (backTextEl)
@@ -80,7 +80,7 @@ const SVC_MAP = {
     C: { name: 'Correction of Entry', window: 'Window 4', icon: 'pencil' },
 };
 let currentStep = 1;
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 5;
 /* ── CLOCK ── */
 function updateClock() {
     const now = new Date();
@@ -94,7 +94,7 @@ updateClock();
 /* ── STEP PROGRESS ── */
 function updateProgress(step) {
     document.getElementById('step-num').textContent = step;
-    ['1', '2', '3', '4'].forEach((n, i) => {
+    ['1', '2', '3', '4', '5'].forEach((n, i) => {
         const lbl = document.getElementById(`lbl-${n}`);
         const fill = document.getElementById(`fill-${n}`);
         const stepN = i + 1;
@@ -125,7 +125,7 @@ function showStep(n) {
     const btnBack = document.getElementById('btn-back');
     const btnNext = document.getElementById('btn-next');
     btnBack.style.display = n > 1 ? '' : 'none';
-    if (n === 4) {
+    if (n === 5) {
         btnNext.innerHTML = `<span class="btn-text" id="btn-next-text">${BTN_LABELS.submit[currentLang]}</span> ${SVG_CHECK}`;
         btnNext.className = 'btn btn-green';
     }
@@ -144,7 +144,6 @@ function goNext() {
     if (currentStep === 1) {
         if (!validateStep1())
             return;
-        populateConfirm();
         showStep(2);
     }
     else if (currentStep === 2) {
@@ -160,11 +159,27 @@ function goNext() {
         showStep(4);
     }
     else if (currentStep === 4) {
+        if (!validateStep4())
+            return;
+        populateConfirm();
+        showStep(5);
+    }
+    else if (currentStep === 5) {
         submitRequest();
     }
 }
 /* ── VALIDATION ── */
 function validateStep1() {
+    const type = document.querySelector('input[name="txn-type"]:checked');
+    const errEl = document.getElementById('type-error');
+    if (!type) {
+        errEl.style.display = 'block';
+        return false;
+    }
+    errEl.style.display = 'none';
+    return true;
+}
+function validateStep2() {
     const svc = document.querySelector('input[name="service"]:checked');
     const errEl = document.getElementById('svc-error');
     if (!svc) {
@@ -174,7 +189,7 @@ function validateStep1() {
     errEl.style.display = 'none';
     return true;
 }
-function validateStep2() {
+function validateStep3() {
     let valid = true;
     const ownerName = document.getElementById('owner-name');
     const ownerRelationship = document.getElementById('owner-relationship');
@@ -193,7 +208,7 @@ function validateStep2() {
         showToast(currentLang === 'fil' ? 'Punan ang mga kinakailangang field.' : 'Please fill in the required fields.', 'error');
     return valid;
 }
-function validateStep3() {
+function validateStep4() {
     let valid = true;
     const fname = document.getElementById('fname');
     const lname = document.getElementById('lname');
@@ -220,6 +235,7 @@ function validateStep3() {
 }
 /* ── CONFIRM ── */
 function populateConfirm() {
+    const type = document.querySelector('input[name="txn-type"]:checked');
     const svc = document.querySelector('input[name="service"]:checked');
     const pur = document.querySelector('input[name="purpose"]:checked');
     const ownerName = document.getElementById('owner-name').value.trim();
@@ -232,6 +248,9 @@ function populateConfirm() {
         const s = SVC_MAP[svc.value];
         document.getElementById('confirm-svc-name').textContent = s.name;
     }
+    document.getElementById('c-type').textContent = type
+        ? type.nextElementSibling.querySelector('.type-name').textContent
+        : '—';
     document.getElementById('c-owner-name').textContent = ownerName || '—';
     document.getElementById('c-owner-relationship').textContent = ownerRelationship.selectedOptions.length
         ? ownerRelationship.selectedOptions[0].textContent
@@ -260,6 +279,7 @@ async function issueNumber() {
     if (!svc)
         return;
     const code = svc.value;
+    const type = document.querySelector('input[name="txn-type"]:checked');
     const pur = document.querySelector('input[name="purpose"]:checked');
     const ownerName = document.getElementById('owner-name').value.trim();
     const ownerRelationship = document.getElementById('owner-relationship').value;
@@ -275,6 +295,7 @@ async function issueNumber() {
     await fbSet(`queue/${numStr}`, {
         code,
         status: 'waiting',
+        transactionType: type ? type.value : null,
         name: fname ? `${fname} ${lname}` : null,
         contact: contact || null,
         purpose: pur ? pur.value : null,
@@ -325,6 +346,7 @@ function getAnotherNumber() {
     document.getElementById('notes').value = '';
     document.getElementById('copies').value = '1';
     document.getElementById('svc-error').style.display = 'none';
+    document.getElementById('type-error').style.display = 'none';
     ['owner-name', 'owner-relationship', 'fname', 'lname', 'contact'].forEach(id => document.getElementById(id).classList.remove('error'));
     // Reset success screen
     document.getElementById('success-screen').classList.remove('show');

@@ -90,31 +90,61 @@
    </div>
   </div>
   <div class="header-title" data-en="Get a Queue Number" data-fil="Kumuha ng Numero sa Pila">Get a Queue Number</div>
-  <div class="header-sub" data-en="Fill in 3 quick steps — takes under a minute" data-fil="Sagutan ang 3 hakbang — wala pang isang minuto">Fill in 3 quick steps — takes under a minute</div>
+  <div class="header-sub" data-en="Fill in 5 quick steps — takes under a minute" data-fil="Sagutan ang 5 hakbang — wala pang isang minuto">Fill in 5 quick steps — takes under a minute</div>
  </div>
 
  <!-- ── STEP PROGRESS BAR ── -->
  <div class="step-progress" id="step-progress">
   <div class="step-labels">
-   <span class="step-label active" id="lbl-1" data-en="Service" data-fil="Serbisyo">Service</span>
-   <span class="step-label" id="lbl-2" data-en="Document Owner" data-fil="May-ari">Document Owner</span>
-   <span class="step-label" id="lbl-3" data-en="Details" data-fil="Detalye">Details</span>
-   <span class="step-label" id="lbl-4" data-en="Confirm" data-fil="Kumpirma">Confirm</span>
+   <span class="step-label active" id="lbl-1" data-en="Type" data-fil="Uri">Type</span>
+   <span class="step-label" id="lbl-2" data-en="Service" data-fil="Serbisyo">Service</span>
+   <span class="step-label" id="lbl-3" data-en="Document Owner" data-fil="May-ari">Document Owner</span>
+   <span class="step-label" id="lbl-4" data-en="Details" data-fil="Detalye">Details</span>
+   <span class="step-label" id="lbl-5" data-en="Confirm" data-fil="Kumpirma">Confirm</span>
   </div>
   <div class="step-track">
    <div class="step-seg"><div class="step-fill" id="fill-1"></div></div>
    <div class="step-seg"><div class="step-fill" id="fill-2"></div></div>
    <div class="step-seg"><div class="step-fill" id="fill-3"></div></div>
    <div class="step-seg"><div class="step-fill" id="fill-4"></div></div>
-   <div class="step-counter">Step <span id="step-num">1</span> of 4</div>
+   <div class="step-seg"><div class="step-fill" id="fill-5"></div></div>
+   <div class="step-counter">Step <span id="step-num">1</span> of 5</div>
   </div>
  </div>
 
  <!-- SCROLL BODY -->
  <div class="scroll-body" id="scroll-body">
 
-  <!-- ══ STEP 1: SERVICE SELECTION ══ -->
+  <!-- ══ STEP 1: TRANSACTION TYPE ══ -->
   <div class="step-panel active" id="step-1">
+   <div class="form-card">
+    <div class="form-card-header">
+     <i data-lucide="split" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
+     <div class="form-card-title" data-en="What do you need today?" data-fil="Ano ang kailangan mo ngayon?">What do you need today?</div>
+    </div>
+    <div class="form-card-body">
+     <div class="type-grid">
+      <input type="radio" name="txn-type" id="type-registration" value="registration" class="type-radio">
+      <label for="type-registration" class="type-label">
+       <div class="type-icon"><i data-lucide="clipboard-list" class="lucide"></i></div>
+       <div class="type-name" data-en="Registration" data-fil="Pagpapatala">Registration</div>
+       <div class="type-desc" data-en="Register a new civil event" data-fil="Magparehistro ng bagong sibil na pangyayari">Register a new civil event</div>
+      </label>
+
+      <input type="radio" name="txn-type" id="type-issuance" value="issuance" class="type-radio">
+      <label for="type-issuance" class="type-label">
+       <div class="type-icon"><i data-lucide="printer" class="lucide"></i></div>
+       <div class="type-name" data-en="Issuance" data-fil="Pag-isyu">Issuance</div>
+       <div class="type-desc" data-en="Request a copy of an existing record" data-fil="Humiling ng kopya ng umiiral na rekord">Request a copy of an existing record</div>
+      </label>
+     </div>
+     <div id="type-error" style="display:none;font-size:.68rem;color:var(--red);font-weight:700;margin-top:.62rem;" data-en="Please select Registration or Issuance to continue." data-fil="Pumili ng Pagpapatala o Pag-isyu upang magpatuloy.">Please select Registration or Issuance to continue.</div>
+    </div>
+   </div>
+  </div>
+
+  <!-- ══ STEP 2: SERVICE SELECTION ══ -->
+  <div class="step-panel" id="step-2">
    <div class="form-card">
     <div class="form-card-header">
      <i data-lucide="layout-grid" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
@@ -183,8 +213,8 @@
    </div>
   </div>
 
-  <!-- ══ STEP 2: DOCUMENT OWNER ══ -->
-  <div class="step-panel" id="step-2">
+  <!-- ══ STEP 3: DOCUMENT OWNER ══ -->
+  <div class="step-panel" id="step-3">
    <div class="form-card">
     <div class="form-card-header">
      <i data-lucide="file-text" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
@@ -217,8 +247,8 @@
    </div>
   </div>
 
-  <!-- ══ STEP 3: REQUESTOR INFORMATION ══ -->
-  <div class="step-panel" id="step-3">
+  <!-- ══ STEP 4: REQUESTOR INFORMATION ══ -->
+  <div class="step-panel" id="step-4">
    <div class="form-card">
     <div class="form-card-header">
      <i data-lucide="user" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
@@ -261,14 +291,18 @@
    </div>
   </div>
 
-  <!-- ══ STEP 4: CONFIRM ══ -->
-  <div class="step-panel" id="step-4">
+  <!-- ══ STEP 5: CONFIRM ══ -->
+  <div class="step-panel" id="step-5">
    <div class="confirm-card">
     <div class="confirm-header">
      <div class="confirm-header-label" data-en="Your Request Summary" data-fil="Buod ng Iyong Kahilingan">Your Request Summary</div>
      <div class="confirm-header-svc" id="confirm-svc-name">—</div>
     </div>
     <div class="confirm-body" id="confirm-body">
+     <div class="confirm-row">
+      <div class="confirm-icon"><i data-lucide="split" class="lucide"></i></div>
+      <div><div class="confirm-key" data-en="Type" data-fil="Uri">Type</div><div class="confirm-val" id="c-type">—</div></div>
+     </div>
      <div class="confirm-row">
       <div class="confirm-icon"><i data-lucide="file-text" class="lucide"></i></div>
       <div><div class="confirm-key" data-en="Document Owner" data-fil="May-ari ng Dokumento">Document Owner</div><div class="confirm-val" id="c-owner-name">—</div></div>
