@@ -708,6 +708,55 @@ body {
   margin-top: .1rem;
 }
 
+/* NOTICE GROUP — separate labeled cards instead of one paragraph */
+.notice-group {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+
+.notice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: .68rem .82rem;
+}
+
+.notice-item-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  background: #fef3c7;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: .05rem;
+}
+
+.notice-item-icon .lucide {
+  width: 15px;
+  height: 15px;
+  color: #92400e;
+}
+
+.notice-item-title {
+  font-size: .72rem;
+  font-weight: 800;
+  color: #78350f;
+  margin-bottom: .16rem;
+}
+
+.notice-item-desc {
+  font-size: .68rem;
+  color: #92400e;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
 /* ── SUCCESS SCREEN ────────────────────────────────── */
 .success-screen {
   display: none;
