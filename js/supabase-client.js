@@ -40,6 +40,7 @@ function queueRowToEntry(row) {
         name: row.name,
         contact: row.contact,
         purpose: row.purpose,
+        transactionType: row.transaction_type,
         ownerName: row.owner_name,
         relationship: row.relationship,
         priority: row.priority,
@@ -69,6 +70,8 @@ function entryToQueueRow(num, entry) {
         row.contact = entry.contact;
     if ('purpose' in entry)
         row.purpose = entry.purpose;
+    if ('transactionType' in entry)
+        row.transaction_type = entry.transactionType;
     if ('ownerName' in entry)
         row.owner_name = entry.ownerName;
     if ('relationship' in entry)

@@ -31,10 +31,11 @@ insert into active_windows (code, active) values ('B',false),('M',false),('D',fa
 create table queue (
   num               text primary key,   -- e.g. 'B001'
   code              text not null,
-  status            text not null default 'waiting',  -- waiting | serving | done | skipped | transferred
+  status            text not null default 'waiting',  -- waiting | serving | done | skipped | transferred | voided
   name              text,               -- requestor name (from public kiosk)
   contact           text,
   purpose           text,
+  transaction_type  text,               -- 'registration' | 'issuance'
   owner_name        text,               -- document owner (may differ from requestor)
   relationship      text,               -- requestor's relationship to owner
   priority          text,
@@ -47,6 +48,8 @@ create table queue (
   staff_note        text,
   staff_note_by     text,
   staff_note_at     bigint,
+  voided_by         text,
+  voided_at         bigint,
   created_at        timestamptz not null default now()
 );
 
@@ -134,3 +137,12 @@ create policy "read own role" on staff_roles for select using (auth.uid() = user
 -- If you already ran an earlier version of this schema (without
 -- display_name), run this once to add it:
 --   alter table staff_roles add column if not exists display_name text;
+
+-- If you already ran an earlier version of this schema (without void
+-- support), run this once to add the missing columns:
+--   alter table queue add column if not exists voided_by text;
+--   alter table queue add column if not exists voided_at bigint;
+
+-- If you already ran an earlier version of this schema (without the
+-- Registration/Issuance type selector), run this once to add it:
+--   alter table queue add column if not exists transaction_type text;
