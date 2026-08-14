@@ -151,7 +151,7 @@ body {
   height: 38px;
   background: rgba(168,114,42,.18);
   border: 1.5px solid rgba(168,114,42,.42);
-  border-radius: 10px;
+  border-radius: 50%;
   overflow: hidden;
   display: flex;
   align-items: center;
