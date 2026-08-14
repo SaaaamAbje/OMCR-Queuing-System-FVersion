@@ -78,7 +78,7 @@
   <div class="header-top">
    <div class="header-brand">
     <div class="app-seal">
-     <img src="images/rosario-seal.jpg" alt="Rosario Seal" style="width:100%;height:100%;object-fit:cover;">
+     <img src="images/rosario-seal.jpg" alt="Rosario Seal" style="width:100%;height:100%;object-fit:contain;">
     </div>
     <div>
      <div class="brand-name">OMCR</div>
@@ -99,7 +99,7 @@
    <span class="step-label active" id="lbl-1" data-en="Type" data-fil="Uri">Type</span>
    <span class="step-label" id="lbl-2" data-en="Service" data-fil="Serbisyo">Service</span>
    <span class="step-label" id="lbl-3" data-en="Document Owner" data-fil="May-ari">Document Owner</span>
-   <span class="step-label" id="lbl-4" data-en="Details" data-fil="Detalye">Details</span>
+   <span class="step-label" id="lbl-4" data-en="Requestor" data-fil="Humihiling">Requestor</span>
    <span class="step-label" id="lbl-5" data-en="Confirm" data-fil="Kumpirma">Confirm</span>
   </div>
   <div class="step-track">
@@ -139,6 +139,30 @@
       </label>
      </div>
      <div id="type-error" style="display:none;font-size:.68rem;color:var(--red);font-weight:700;margin-top:.62rem;" data-en="Please select Registration or Issuance to continue." data-fil="Pumili ng Pagpapatala o Pag-isyu upang magpatuloy.">Please select Registration or Issuance to continue.</div>
+    </div>
+   </div>
+
+   <div class="notice-group">
+    <div class="notice-item">
+     <div class="notice-item-icon"><i data-lucide="users" class="lucide"></i></div>
+     <div>
+      <div class="notice-item-title" data-en="Who May Request" data-fil="Sino ang Maaaring Humiling">Who May Request</div>
+      <div class="notice-item-desc" data-en="Only the document owner, or their child, spouse, or parent, is authorized to request a document." data-fil="Ang may-ari lamang ng dokumento, o ang kanilang anak, asawa, o magulang, ang may karapatang humiling ng dokumento.">Only the document owner, or their child, spouse, or parent, is authorized to request a document.</div>
+     </div>
+    </div>
+    <div class="notice-item">
+     <div class="notice-item-icon"><i data-lucide="id-card" class="lucide"></i></div>
+     <div>
+      <div class="notice-item-title" data-en="Bring a Valid ID" data-fil="Magdala ng Wastong ID">Bring a Valid ID</div>
+      <div class="notice-item-desc" data-en="A valid government-issued ID is required when your number is called." data-fil="Kinakailangan ang wastong ID mula sa gobyerno kapag tinawag na ang inyong numero.">A valid government-issued ID is required when your number is called.</div>
+     </div>
+    </div>
+    <div class="notice-item">
+     <div class="notice-item-icon"><i data-lucide="file-signature" class="lucide"></i></div>
+     <div>
+      <div class="notice-item-title" data-en="Requesting for Someone Else?" data-fil="Humihiling Para sa Iba?">Requesting for Someone Else?</div>
+      <div class="notice-item-desc" data-en="Bring an authorization letter along with valid IDs of both the requestor and the document owner." data-fil="Magdala ng liham ng pahintulot kasama ang mga wastong ID ng humihiling at ng may-ari ng dokumento.">Bring an authorization letter along with valid IDs of both the requestor and the document owner.</div>
+     </div>
     </div>
    </div>
   </div>
@@ -218,7 +242,7 @@
    <div class="form-card">
     <div class="form-card-header">
      <i data-lucide="file-text" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
-     <div class="form-card-title" data-en="Whose document is this?" data-fil="Kaninong dokumento ito?">Whose document is this?</div>
+     <div class="form-card-title" data-en="Document Owner Information" data-fil="Impormasyon ng May-ari ng Dokumento">Document Owner Information</div>
     </div>
     <div class="form-card-body">
      <div class="field-group">
@@ -252,7 +276,7 @@
    <div class="form-card">
     <div class="form-card-header">
      <i data-lucide="user" class="lucide" style="width:14px;height:14px;color:var(--gold-light);"></i>
-     <div class="form-card-title" data-en="Your Information" data-fil="Iyong Impormasyon">Your Information</div>
+     <div class="form-card-title" data-en="Requestor's Information" data-fil="Impormasyon ng Humihiling">Requestor's Information</div>
     </div>
     <div class="form-card-body">
      <div class="field-group">
