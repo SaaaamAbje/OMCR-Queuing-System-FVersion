@@ -82,15 +82,7 @@ const SVC_MAP = {
 let currentStep = 1;
 const TOTAL_STEPS = 5;
 /* ── CLOCK ── */
-function updateClock() {
-    const now = new Date();
-    const t = now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', hour12: false });
-    document.getElementById('clock').textContent = t;
-    document.getElementById('status-time').textContent =
-        `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-}
-setInterval(updateClock, 10000);
-updateClock();
+/* Time display removed — no clock elements to update */
 /* ── STEP PROGRESS ── */
 function updateProgress(step) {
     document.getElementById('step-num').textContent = step;
